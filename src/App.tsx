@@ -13,9 +13,6 @@ import benefitFile from './assets/benefit-file.svg';
 import closeIcon from './assets/close.svg';
 import heroCar from './assets/hero-car.png';
 import heroCheck from './assets/hero-check.png';
-import statusBattery from './assets/status-battery.svg';
-import statusCellular from './assets/status-cellular.svg';
-import statusWifi from './assets/status-wifi.svg';
 
 const benefits = [
   {
@@ -465,15 +462,6 @@ function App() {
         )}
 
         <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-status-bar" aria-hidden="true">
-            <span className="hero-status-time">9:41</span>
-            <span className="hero-status-icons">
-              <img src={statusCellular} alt="" />
-              <img src={statusWifi} alt="" />
-              <img src={statusBattery} alt="" />
-            </span>
-          </div>
-
           <nav className="hero-navigation" aria-label="Навигация">
             <button className="hero-close" type="button" aria-label="Закрыть">
               <img src={closeIcon} alt="" />
@@ -526,13 +514,6 @@ function App() {
         </section>
 
         <section className="content" ref={contentRef} aria-label="Заявка на автокредит">
-          <button
-            className="primary-button top-cta"
-            type="button"
-            onClick={handleTopCtaClick}
-          >
-            Оставить заявку
-          </button>
 
           <ul className="benefits-list" aria-label="Преимущества">
             {benefits.map((benefit) => (
