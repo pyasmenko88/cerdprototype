@@ -49,6 +49,7 @@ const HERO_AMOUNT_END = 100;
 const HERO_COUNTER_DELAY = 180;
 const HERO_COUNTER_DURATION = 1000;
 const HERO_SCROLL_PIXELS_PER_UNIT = 24;
+const HERO_SCROLL_STEP = 10;
 
 const easeOutCubic = (progress: number) => 1 - Math.pow(1 - progress, 3);
 
@@ -318,7 +319,8 @@ function App() {
     const updateAmountFromScroll = () => {
       const scrollY = Math.max(window.scrollY, 0);
       const nextAmount =
-        HERO_AMOUNT_END + Math.floor(scrollY / HERO_SCROLL_PIXELS_PER_UNIT);
+        HERO_AMOUNT_END +
+        Math.floor(scrollY / HERO_SCROLL_PIXELS_PER_UNIT) * HERO_SCROLL_STEP;
 
       setHeroAmount((currentAmount) =>
         currentAmount === nextAmount ? currentAmount : nextAmount,
