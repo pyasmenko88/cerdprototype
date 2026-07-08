@@ -1,4 +1,10 @@
 import { useRef, type FormEvent } from 'react';
+import closeIcon from './assets/close.svg';
+import heroCar from './assets/hero-car.png';
+import heroCheck from './assets/hero-check.svg';
+import statusBattery from './assets/status-battery.svg';
+import statusCellular from './assets/status-cellular.svg';
+import statusWifi from './assets/status-wifi.svg';
 
 const benefits = [
   'Подберите автомобиль под ваш бюджет',
@@ -26,14 +32,32 @@ function App() {
     <main className="page-shell">
       <div className="mobile-page">
         <section className="hero" aria-labelledby="hero-title">
-          <button className="hero-close" type="button" aria-label="Закрыть">
-            x
-          </button>
+          <div className="hero-status-bar" aria-hidden="true">
+            <span className="hero-status-time">9:41</span>
+            <span className="hero-status-icons">
+              <img src={statusCellular} alt="" />
+              <img src={statusWifi} alt="" />
+              <img src={statusBattery} alt="" />
+            </span>
+          </div>
+
+          <nav className="hero-navigation" aria-label="Навигация">
+            <button className="hero-close" type="button" aria-label="Закрыть">
+              <img src={closeIcon} alt="" />
+            </button>
+          </nav>
+
           <div className="hero-content">
-            <h1 id="hero-title">Автокредит на выгодных условиях</h1>
-            <p>Оставьте заявку и получите предварительное решение.</p>
-            <div className="car-placeholder" aria-label="Временное изображение автомобиля">
-              Placeholder автомобиля
+            <div className="hero-copy">
+              <h1 id="hero-title">от 100 млн сум</h1>
+              <p>на покупку автомобиля</p>
+            </div>
+
+            <div className="hero-media" aria-hidden="true">
+              <div className="hero-car-stage">
+                <img className="hero-car" src={heroCar} alt="" />
+                <img className="hero-check" src={heroCheck} alt="" />
+              </div>
             </div>
           </div>
         </section>
@@ -42,7 +66,6 @@ function App() {
           <button
             className="primary-button top-cta"
             type="button"
-            data-scroll-target="application-form"
             onClick={handleTopCtaClick}
           >
             Оставить заявку

@@ -7,7 +7,7 @@
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: #eef0f4;
   color: #1f1f29;
 }
@@ -27,6 +27,8 @@ button {
 }
 
 .mobile-page {
+  --hero-overlap: clamp(80px, 23.08vw, 100px);
+
   width: 100%;
   max-width: 460px;
   margin: 0 auto;
@@ -37,43 +39,166 @@ button {
   position: sticky;
   top: 0;
   z-index: 0;
-  min-height: 460px;
-  padding: 24px 20px;
-  background: #d9ccff;
+  display: flex;
+  height: clamp(450px, 118.46vw, 500px);
+  flex-direction: column;
+  align-items: center;
+  overflow: clip;
+  background: linear-gradient(180deg, #7259e6 0%, #2d008e 79.13%);
+}
+
+.hero-status-bar {
+  display: flex;
+  width: 100%;
+  height: 62px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 21px 38px 19px 46px;
+  color: #ffffff;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 22px;
+}
+
+.hero-status-icons {
+  display: flex;
+  width: 71px;
+  flex: 0 0 71px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 7px;
+  overflow: clip;
+}
+
+.hero-status-icons img {
+  display: block;
+  height: auto;
+}
+
+.hero-status-icons img:nth-child(1) {
+  width: 19.2px;
+  height: 12.23px;
+}
+
+.hero-status-icons img:nth-child(2) {
+  width: 17.14px;
+  height: 12.33px;
+}
+
+.hero-status-icons img:nth-child(3) {
+  width: 27.33px;
+  height: 13px;
+}
+
+.hero-navigation {
+  display: flex;
+  width: 100%;
+  height: 42px;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 9px 16px;
 }
 
 .hero-close {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.hero-close img {
   display: block;
-  margin-left: auto;
+  width: 24px;
+  height: 24px;
 }
 
 .hero-content {
-  display: grid;
-  gap: 16px;
-  padding-top: 48px;
+  display: flex;
+  width: 100%;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 16px;
 }
 
-.hero h1,
-.hero p,
+.hero-copy {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  text-align: center;
+}
+
+.hero-copy h1,
+.hero-copy p,
 .application-form h2,
 .consent-text {
   margin: 0;
 }
 
-.car-placeholder {
-  display: grid;
-  min-height: 180px;
-  place-items: center;
-  border: 1px dashed #7a65b8;
-  background: #eee8ff;
+.hero-copy h1 {
+  background: linear-gradient(180deg, #ffffff 19.39%, #9a70ff 147.96%);
+  background-clip: text;
+  color: transparent;
+  font-size: clamp(29px, 7.95vw, 36px);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.hero-copy p {
+  color: #ffffff;
+  font-size: 20px;
+  line-height: 25px;
+  letter-spacing: 0.38px;
+}
+
+.hero-media {
+  display: flex;
+  width: 100%;
+  height: 277px;
+  justify-content: center;
+  overflow: clip;
+  padding-top: 16px;
+}
+
+.hero-car-stage {
+  --hero-car-width: clamp(452px, 125.64vw, 578px);
+
+  position: relative;
+  width: var(--hero-car-width);
+  height: calc(var(--hero-car-width) * 0.5633);
+  flex: 0 0 auto;
+}
+
+.hero-car,
+.hero-check {
+  pointer-events: none;
+  user-select: none;
+}
+
+.hero-car {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hero-check {
+  position: absolute;
+  top: 2px;
+  right: calc(var(--hero-car-width) * 0.235);
+  width: clamp(48px, 13.33vw, 62px);
+  height: auto;
 }
 
 .content {
   position: relative;
   z-index: 1;
-  margin-top: -20px;
+  margin-top: calc(-1 * var(--hero-overlap));
   padding: 24px 20px 40px;
-  border-radius: 20px 20px 0 0;
+  border-radius: 38px 38px 0 0;
   background: #ffffff;
 }
 
