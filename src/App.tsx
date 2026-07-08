@@ -214,7 +214,7 @@ function App() {
         if (!isCancelled) {
           setIntroPhase('ready');
         }
-      }, 300);
+      }, 1200);
     });
 
     return () => {

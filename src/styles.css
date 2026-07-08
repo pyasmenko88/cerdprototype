@@ -81,6 +81,66 @@ button {
   }
 }
 
+.mobile-page[data-intro-phase='loading'] .hero-copy h1,
+.mobile-page[data-intro-phase='loading'] .hero-copy p,
+.mobile-page[data-intro-phase='loading'] .hero-media {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+.mobile-page[data-intro-phase='loading'] .content {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.mobile-page[data-intro-phase='entering'] .hero-copy h1,
+.mobile-page[data-intro-phase='entering'] .hero-copy p,
+.mobile-page[data-intro-phase='entering'] .hero-media,
+.mobile-page[data-intro-phase='entering'] .content,
+.mobile-page[data-intro-phase='ready'] .hero-copy h1,
+.mobile-page[data-intro-phase='ready'] .hero-copy p,
+.mobile-page[data-intro-phase='ready'] .hero-media,
+.mobile-page[data-intro-phase='ready'] .content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mobile-page:not([data-intro-phase='ready']) .hero-copy h1,
+.mobile-page:not([data-intro-phase='ready']) .hero-copy p,
+.mobile-page:not([data-intro-phase='ready']) .hero-media,
+.mobile-page:not([data-intro-phase='ready']) .content {
+  will-change: opacity, transform;
+}
+
+.mobile-page[data-intro-phase='loading'] .content,
+.mobile-page[data-intro-phase='entering'] .content {
+  pointer-events: none;
+}
+
+.mobile-page[data-intro-phase='entering'] .hero-copy h1 {
+  transition:
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1) 120ms,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1) 120ms;
+}
+
+.mobile-page[data-intro-phase='entering'] .hero-copy p {
+  transition:
+    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1) 240ms,
+    transform 420ms cubic-bezier(0.22, 1, 0.36, 1) 240ms;
+}
+
+.mobile-page[data-intro-phase='entering'] .hero-media {
+  transition:
+    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) 380ms,
+    transform 500ms cubic-bezier(0.22, 1, 0.36, 1) 380ms;
+}
+
+.mobile-page[data-intro-phase='entering'] .content {
+  transition:
+    opacity 540ms cubic-bezier(0.22, 1, 0.36, 1) 560ms,
+    transform 540ms cubic-bezier(0.22, 1, 0.36, 1) 560ms;
+}
+
 .hero {
   position: sticky;
   top: 0;
@@ -499,6 +559,15 @@ button {
 
   .intro-spinner {
     animation-duration: 1400ms;
+  }
+
+  .mobile-page .hero-copy h1,
+  .mobile-page .hero-copy p,
+  .mobile-page .hero-media,
+  .mobile-page .content {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 
   .form-field-label {
