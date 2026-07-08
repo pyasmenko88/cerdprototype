@@ -307,7 +307,10 @@ button {
 }
 
 .form-field {
+  position: relative;
   display: block;
+  width: 100%;
+  color: #9191a1;
 }
 
 .application-form input {
@@ -319,7 +322,7 @@ button {
   border: 0;
   border-radius: 12px;
   outline: none;
-  padding: 0 16px;
+  padding: 26px 40px 10px 16px;
   background: #f7f7f8;
   color: #000000;
   font-size: 17px;
@@ -328,9 +331,92 @@ button {
   letter-spacing: 0;
 }
 
-.application-form input::placeholder {
+.form-field-label {
+  position: absolute;
+  top: 21px;
+  left: 16px;
+  right: 40px;
+  z-index: 1;
+  overflow: hidden;
   color: #9191a1;
-  opacity: 1;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 22px;
+  letter-spacing: 0;
+  pointer-events: none;
+  text-overflow: ellipsis;
+  transition:
+    top 120ms ease,
+    font-size 120ms ease,
+    line-height 120ms ease,
+    color 120ms ease;
+  white-space: nowrap;
+}
+
+.form-field.is-focused .form-field-label,
+.form-field.is-filled .form-field-label,
+.form-field:has(input:-webkit-autofill) .form-field-label {
+  top: 12px;
+  font-size: 12px;
+  line-height: 16px;
+  letter-spacing: 0;
+}
+
+.form-field.is-error .form-field-label {
+  color: #ff3333;
+}
+
+.form-field.is-error input {
+  background: rgb(255 51 51 / 5%);
+}
+
+.form-field input:disabled {
+  background: #f7f7f8;
+  color: #c7c7cf;
+  cursor: not-allowed;
+  -webkit-text-fill-color: #c7c7cf;
+}
+
+.form-field.is-disabled .form-field-label {
+  color: #c7c7cf;
+}
+
+.form-field-clear {
+  position: absolute;
+  top: 18px;
+  right: 8px;
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #9191a1;
+}
+
+.form-field-clear::before {
+  display: block;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  content: "";
+  mask: url("./assets/input-clear.svg") center / contain no-repeat;
+  -webkit-mask: url("./assets/input-clear.svg") center / contain no-repeat;
+}
+
+.form-field.is-error .form-field-clear {
+  color: #ff3333;
+}
+
+.form-field-error {
+  display: block;
+  margin-top: 4px;
+  color: #ff3333;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  letter-spacing: 0;
 }
 
 .application-form input:-webkit-autofill,
@@ -343,13 +429,27 @@ button {
 
 .application-form input:focus {
   background: #f7f7f8;
-  box-shadow: 0 0 0 2px rgb(112 0 255 / 25%);
+}
+
+.form-field.is-error input:focus {
+  background: rgb(255 51 51 / 5%);
 }
 
 .application-form input:-webkit-autofill:focus {
-  -webkit-box-shadow:
-    0 0 0 1000px #f7f7f8 inset,
-    0 0 0 2px rgb(112 0 255 / 25%);
+  -webkit-box-shadow: 0 0 0 1000px #f7f7f8 inset;
+}
+
+.form-field.is-error input:-webkit-autofill,
+.form-field.is-error input:-webkit-autofill:hover,
+.form-field.is-error input:-webkit-autofill:active,
+.form-field.is-error input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px rgb(255 51 51 / 5%) inset;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-field-label {
+    transition: none;
+  }
 }
 
 .form-actions {

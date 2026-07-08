@@ -1,4 +1,11 @@
-import { useRef, type FormEvent } from 'react';
+import {
+  useRef,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+  type InputHTMLAttributes,
+  type RefObject,
+} from 'react';
 import benefitCar from './assets/benefit-car.svg';
 import benefitClock from './assets/benefit-clock.svg';
 import benefitFile from './assets/benefit-file.svg';
@@ -24,8 +31,113 @@ const benefits = [
   },
 ];
 
+const fieldLabels = {
+  name: 'Имя',
+  phone: 'Номер телефона',
+  initialPayment: 'Первоначальный взнос сум',
+};
+
+type FieldName = keyof typeof fieldLabels;
+
+type FormValues = Record<FieldName, string>;
+
+type FormFieldProps = {
+  name: FieldName;
+  label: string;
+  value: string;
+  touched: boolean;
+  focused: boolean;
+  inputRef: RefObject<HTMLInputElement>;
+  inputProps: InputHTMLAttributes<HTMLInputElement>;
+  onChange: (name: FieldName, value: string) => void;
+  onBlur: (name: FieldName) => void;
+  onFocus: (name: FieldName) => void;
+  onClear: (name: FieldName) => void;
+};
+
+function FormField({
+  name,
+  label,
+  value,
+  touched,
+  focused,
+  inputRef,
+  inputProps,
+  onChange,
+  onBlur,
+  onFocus,
+  onClear,
+}: FormFieldProps) {
+  const isFilled = value.length > 0;
+  const isError = touched && value.trim().length === 0;
+  const isDisabled = Boolean(inputProps.disabled);
+  const errorId = `${name}-error`;
+  const className = [
+    'form-field',
+    focused && 'is-focused',
+    isFilled && 'is-filled',
+    isError && 'is-error',
+    isDisabled && 'is-disabled',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    onChange(name, event.target.value);
+  };
+
+  return (
+    <label className={className}>
+      <span className="form-field-label">{label}</span>
+      <input
+        {...inputProps}
+        ref={inputRef}
+        name={name}
+        value={value}
+        aria-invalid={isError ? 'true' : undefined}
+        aria-describedby={isError ? errorId : undefined}
+        onChange={handleInputChange}
+        onFocus={() => onFocus(name)}
+        onBlur={() => onBlur(name)}
+      />
+
+      {isFilled && !isDisabled && (
+        <button
+          className="form-field-clear"
+          type="button"
+          aria-label={`Очистить поле ${label}`}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={() => onClear(name)}
+        />
+      )}
+
+      {isError && (
+        <span className="form-field-error" id={errorId} role="alert">
+          Обязательное поле
+        </span>
+      )}
+    </label>
+  );
+}
+
 function App() {
   const applicationFormRef = useRef<HTMLElement | null>(null);
+  const inputRefs = {
+    name: useRef<HTMLInputElement | null>(null),
+    phone: useRef<HTMLInputElement | null>(null),
+    initialPayment: useRef<HTMLInputElement | null>(null),
+  };
+  const [values, setValues] = useState<FormValues>({
+    name: '',
+    phone: '',
+    initialPayment: '',
+  });
+  const [touched, setTouched] = useState<Record<FieldName, boolean>>({
+    name: false,
+    phone: false,
+    initialPayment: false,
+  });
+  const [focusedField, setFocusedField] = useState<FieldName | null>(null);
 
   const handleTopCtaClick = () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -38,6 +150,48 @@ function App() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    const allTouched = {
+      name: true,
+      phone: true,
+      initialPayment: true,
+    };
+    const firstEmptyField = (Object.keys(values) as FieldName[]).find(
+      (fieldName) => values[fieldName].trim().length === 0,
+    );
+
+    setTouched(allTouched);
+
+    if (firstEmptyField) {
+      inputRefs[firstEmptyField].current?.focus({ preventScroll: true });
+    }
+  };
+
+  const handleFieldChange = (name: FieldName, value: string) => {
+    setValues((currentValues) => ({
+      ...currentValues,
+      [name]: value,
+    }));
+  };
+
+  const handleFieldFocus = (name: FieldName) => {
+    setFocusedField(name);
+  };
+
+  const handleFieldBlur = (name: FieldName) => {
+    setFocusedField((currentField) => (currentField === name ? null : currentField));
+    setTouched((currentTouched) => ({
+      ...currentTouched,
+      [name]: true,
+    }));
+  };
+
+  const handleFieldClear = (name: FieldName) => {
+    setValues((currentValues) => ({
+      ...currentValues,
+      [name]: '',
+    }));
+
+    inputRefs[name].current?.focus({ preventScroll: true });
   };
 
   return (
@@ -119,36 +273,57 @@ function App() {
 
             <form onSubmit={handleSubmit}>
               <div className="form-fields">
-                <label className="form-field">
-                  <span className="visually-hidden">Имя</span>
-                  <input
-                    type="text"
-                    name="name"
-                    autoComplete="name"
-                    placeholder="Имя"
-                  />
-                </label>
+                <FormField
+                  name="name"
+                  label={fieldLabels.name}
+                  value={values.name}
+                  touched={touched.name}
+                  focused={focusedField === 'name'}
+                  inputRef={inputRefs.name}
+                  inputProps={{
+                    type: 'text',
+                    autoComplete: 'name',
+                  }}
+                  onChange={handleFieldChange}
+                  onFocus={handleFieldFocus}
+                  onBlur={handleFieldBlur}
+                  onClear={handleFieldClear}
+                />
 
-                <label className="form-field">
-                  <span className="visually-hidden">Номер телефона</span>
-                  <input
-                    type="tel"
-                    name="phone"
-                    inputMode="tel"
-                    autoComplete="tel"
-                    placeholder="Номер телефона"
-                  />
-                </label>
+                <FormField
+                  name="phone"
+                  label={fieldLabels.phone}
+                  value={values.phone}
+                  touched={touched.phone}
+                  focused={focusedField === 'phone'}
+                  inputRef={inputRefs.phone}
+                  inputProps={{
+                    type: 'tel',
+                    inputMode: 'tel',
+                    autoComplete: 'tel',
+                  }}
+                  onChange={handleFieldChange}
+                  onFocus={handleFieldFocus}
+                  onBlur={handleFieldBlur}
+                  onClear={handleFieldClear}
+                />
 
-                <label className="form-field">
-                  <span className="visually-hidden">Первоначальный взнос сум</span>
-                  <input
-                    type="text"
-                    name="initialPayment"
-                    inputMode="numeric"
-                    placeholder="Первоначальный взнос сум"
-                  />
-                </label>
+                <FormField
+                  name="initialPayment"
+                  label={fieldLabels.initialPayment}
+                  value={values.initialPayment}
+                  touched={touched.initialPayment}
+                  focused={focusedField === 'initialPayment'}
+                  inputRef={inputRefs.initialPayment}
+                  inputProps={{
+                    type: 'text',
+                    inputMode: 'numeric',
+                  }}
+                  onChange={handleFieldChange}
+                  onFocus={handleFieldFocus}
+                  onBlur={handleFieldBlur}
+                  onClear={handleFieldClear}
+                />
               </div>
 
               <div className="form-actions">
