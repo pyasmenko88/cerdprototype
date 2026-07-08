@@ -118,28 +118,48 @@ function App() {
             <h2 id="application-form-title">Заполните заявку — мы свяжемся с вами</h2>
 
             <form onSubmit={handleSubmit}>
-              <label>
-                Имя
-                <input type="text" name="name" autoComplete="name" />
-              </label>
+              <div className="form-fields">
+                <label className="form-field">
+                  <span className="visually-hidden">Имя</span>
+                  <input
+                    type="text"
+                    name="name"
+                    autoComplete="name"
+                    placeholder="Имя"
+                  />
+                </label>
 
-              <label>
-                Телефон
-                <input type="tel" name="phone" inputMode="tel" autoComplete="tel" />
-              </label>
+                <label className="form-field">
+                  <span className="visually-hidden">Номер телефона</span>
+                  <input
+                    type="tel"
+                    name="phone"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="Номер телефона"
+                  />
+                </label>
 
-              <label>
-                Первоначальный взнос
-                <input type="text" name="initialPayment" inputMode="numeric" />
-              </label>
+                <label className="form-field">
+                  <span className="visually-hidden">Первоначальный взнос сум</span>
+                  <input
+                    type="text"
+                    name="initialPayment"
+                    inputMode="numeric"
+                    placeholder="Первоначальный взнос сум"
+                  />
+                </label>
+              </div>
 
-              <button className="primary-button" type="submit">
-                Оставить заявку
-              </button>
+              <div className="form-actions">
+                <button className="primary-button" type="submit">
+                  Оставить заявку
+                </button>
 
-              <p className="consent-text">
-                Нажимая кнопку, вы соглашаетесь на обработку персональных данных.
-              </p>
+                <p className="consent-text">
+                  Нажимая кнопку, вы соглашаетесь с обработкой персональных данных
+                </p>
+              </div>
             </form>
           </section>
         </section>
