@@ -48,6 +48,7 @@ const HERO_AMOUNT_START = 85;
 const HERO_AMOUNT_END = 100;
 const HERO_COUNTER_DELAY = 180;
 const HERO_COUNTER_DURATION = 1000;
+const HERO_SCROLL_PIXELS_PER_UNIT = 24;
 
 const easeOutCubic = (progress: number) => 1 - Math.pow(1 - progress, 3);
 
@@ -139,6 +140,7 @@ function App() {
   const contentRef = useRef<HTMLElement | null>(null);
   const introTimeoutRef = useRef<number | null>(null);
   const introFrameRef = useRef<number | null>(null);
+  const scrollFrameRef = useRef<number | null>(null);
   const lockedScrollYRef = useRef(0);
   const inputRefs = {
     name: useRef<HTMLInputElement | null>(null),
@@ -300,6 +302,49 @@ function App() {
   }, [introPhase]);
 
   useEffect(() => {
+    const cancelScrollFrame = () => {
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+        scrollFrameRef.current = null;
+      }
+    };
+
+    cancelScrollFrame();
+
+    if (introPhase !== 'ready') {
+      return undefined;
+    }
+
+    const updateAmountFromScroll = () => {
+      const scrollY = Math.max(window.scrollY, 0);
+      const nextAmount =
+        HERO_AMOUNT_END + Math.floor(scrollY / HERO_SCROLL_PIXELS_PER_UNIT);
+
+      setHeroAmount((currentAmount) =>
+        currentAmount === nextAmount ? currentAmount : nextAmount,
+      );
+
+      scrollFrameRef.current = null;
+    };
+
+    const handleScroll = () => {
+      if (scrollFrameRef.current !== null) {
+        return;
+      }
+
+      scrollFrameRef.current = window.requestAnimationFrame(updateAmountFromScroll);
+    };
+
+    updateAmountFromScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelScrollFrame();
+    };
+  }, [introPhase]);
+
+  useEffect(() => {
     return () => {
       if (introTimeoutRef.current !== null) {
         window.clearTimeout(introTimeoutRef.current);
@@ -307,6 +352,10 @@ function App() {
 
       if (introFrameRef.current !== null) {
         window.cancelAnimationFrame(introFrameRef.current);
+      }
+
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
       }
     };
   }, []);
@@ -434,7 +483,11 @@ function App() {
               <h1
                 id="hero-title"
                 ref={heroTitleRef}
-                aria-label="от 100 млн сум"
+                aria-label={
+                  introPhase === 'ready'
+                    ? `от ${heroAmount} млн сум`
+                    : 'от 100 млн сум'
+                }
               >
                 от{' '}
                 <span className="hero-amount" aria-hidden="true">
