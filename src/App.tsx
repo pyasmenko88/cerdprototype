@@ -1,4 +1,7 @@
 import { useRef, type FormEvent } from 'react';
+import benefitCar from './assets/benefit-car.svg';
+import benefitClock from './assets/benefit-clock.svg';
+import benefitFile from './assets/benefit-file.svg';
 import closeIcon from './assets/close.svg';
 import heroCar from './assets/hero-car.png';
 import heroCheck from './assets/hero-check.png';
@@ -7,9 +10,18 @@ import statusCellular from './assets/status-cellular.svg';
 import statusWifi from './assets/status-wifi.svg';
 
 const benefits = [
-  'Подберите автомобиль под ваш бюджет',
-  'Получите условия по кредиту заранее',
-  'Оставьте заявку без лишних документов',
+  {
+    text: 'Оставьте заявку всего за 1 минуту',
+    icon: benefitClock,
+  },
+  {
+    text: 'Поможем подобрать автомобиль',
+    icon: benefitCar,
+  },
+  {
+    text: 'Оформление и выдача авто за 1 день',
+    icon: benefitFile,
+  },
 ];
 
 function App() {
@@ -87,12 +99,12 @@ function App() {
           </button>
 
           <ul className="benefits-list" aria-label="Преимущества">
-            {benefits.map((benefit, index) => (
-              <li className="benefit-item" key={benefit}>
+            {benefits.map((benefit) => (
+              <li className="benefit-item" key={benefit.text}>
                 <span className="benefit-icon" aria-hidden="true">
-                  Icon {index + 1}
+                  <img src={benefit.icon} alt="" width="24" height="24" />
                 </span>
-                <span>{benefit}</span>
+                <span className="benefit-text">{benefit.text}</span>
               </li>
             ))}
           </ul>
