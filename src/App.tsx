@@ -1,4 +1,4 @@
-import type { FormEvent } from 'react';
+import { useRef, type FormEvent } from 'react';
 
 const benefits = [
   'Подберите автомобиль под ваш бюджет',
@@ -7,6 +7,17 @@ const benefits = [
 ];
 
 function App() {
+  const applicationFormRef = useRef<HTMLElement | null>(null);
+
+  const handleTopCtaClick = () => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    applicationFormRef.current?.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'start',
+    });
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
   };
@@ -28,7 +39,12 @@ function App() {
         </section>
 
         <section className="content" aria-label="Заявка на автокредит">
-          <button className="primary-button top-cta" type="button" data-scroll-target="application-form">
+          <button
+            className="primary-button top-cta"
+            type="button"
+            data-scroll-target="application-form"
+            onClick={handleTopCtaClick}
+          >
             Оставить заявку
           </button>
 
@@ -43,7 +59,12 @@ function App() {
             ))}
           </ul>
 
-          <section className="application-form" id="application-form" aria-labelledby="application-form-title">
+          <section
+            className="application-form"
+            id="application-form"
+            ref={applicationFormRef}
+            aria-labelledby="application-form-title"
+          >
             <h2 id="application-form-title">Заполните заявку — мы свяжемся с вами</h2>
 
             <form onSubmit={handleSubmit}>

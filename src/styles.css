@@ -114,6 +114,7 @@ button {
 .application-form {
   display: grid;
   gap: 16px;
+  scroll-margin-top: 20px;
   padding-top: 8px;
 }
 
