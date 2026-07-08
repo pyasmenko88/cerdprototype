@@ -128,9 +128,11 @@ function App() {
   const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
   const heroSubtitleRef = useRef<HTMLParagraphElement | null>(null);
   const heroMediaRef = useRef<HTMLDivElement | null>(null);
+  const heroImageRef = useRef<HTMLImageElement | null>(null);
   const contentRef = useRef<HTMLElement | null>(null);
   const introTimeoutRef = useRef<number | null>(null);
   const introFrameRef = useRef<number | null>(null);
+  const lockedScrollYRef = useRef(0);
   const inputRefs = {
     name: useRef<HTMLInputElement | null>(null),
     phone: useRef<HTMLInputElement | null>(null),
@@ -148,9 +150,84 @@ function App() {
     initialPayment: false,
   });
   const [focusedField, setFocusedField] = useState<FieldName | null>(null);
+  const shouldLockScroll = introPhase !== 'ready';
 
   useEffect(() => {
-    setIntroPhase('ready');
+    let isCancelled = false;
+    let removeHeroImageListeners: (() => void) | null = null;
+
+    const waitForMinimumLoading = () =>
+      new Promise<void>((resolve) => {
+        introTimeoutRef.current = window.setTimeout(() => {
+          introTimeoutRef.current = null;
+          resolve();
+        }, 800);
+      });
+
+    const waitForHeroImage = () =>
+      new Promise<void>((resolve) => {
+        const image = heroImageRef.current;
+
+        if (!image) {
+          resolve();
+          return;
+        }
+
+        const decodeImage = async () => {
+          if ('decode' in image) {
+            await image.decode().catch(() => undefined);
+          }
+
+          resolve();
+        };
+
+        if (image.complete) {
+          void decodeImage();
+          return;
+        }
+
+        const handleImageDone = () => {
+          removeHeroImageListeners?.();
+          removeHeroImageListeners = null;
+          void decodeImage();
+        };
+
+        image.addEventListener('load', handleImageDone, { once: true });
+        image.addEventListener('error', handleImageDone, { once: true });
+
+        removeHeroImageListeners = () => {
+          image.removeEventListener('load', handleImageDone);
+          image.removeEventListener('error', handleImageDone);
+        };
+      });
+
+    void Promise.allSettled([waitForMinimumLoading(), waitForHeroImage()]).then(() => {
+      if (isCancelled) {
+        return;
+      }
+
+      setIntroPhase('entering');
+
+      introTimeoutRef.current = window.setTimeout(() => {
+        introTimeoutRef.current = null;
+
+        if (!isCancelled) {
+          setIntroPhase('ready');
+        }
+      }, 300);
+    });
+
+    return () => {
+      isCancelled = true;
+
+      if (introTimeoutRef.current !== null) {
+        window.clearTimeout(introTimeoutRef.current);
+        introTimeoutRef.current = null;
+      }
+
+      removeHeroImageListeners?.();
+      removeHeroImageListeners = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -164,6 +241,38 @@ function App() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (!shouldLockScroll) {
+      return undefined;
+    }
+
+    const { body, documentElement } = document;
+    const previousBodyPosition = body.style.position;
+    const previousBodyTop = body.style.top;
+    const previousBodyLeft = body.style.left;
+    const previousBodyRight = body.style.right;
+    const previousBodyWidth = body.style.width;
+    const previousDocumentOverflow = documentElement.style.overflow;
+
+    lockedScrollYRef.current = window.scrollY;
+    body.style.position = 'fixed';
+    body.style.top = `-${lockedScrollYRef.current}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    documentElement.style.overflow = 'hidden';
+
+    return () => {
+      body.style.position = previousBodyPosition;
+      body.style.top = previousBodyTop;
+      body.style.left = previousBodyLeft;
+      body.style.right = previousBodyRight;
+      body.style.width = previousBodyWidth;
+      documentElement.style.overflow = previousDocumentOverflow;
+      window.scrollTo(0, lockedScrollYRef.current);
+    };
+  }, [shouldLockScroll]);
 
   const handleTopCtaClick = () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -223,6 +332,18 @@ function App() {
   return (
     <main className="page-shell">
       <div className="mobile-page" data-intro-phase={introPhase}>
+        {introPhase !== 'ready' && (
+          <div
+            className="intro-overlay"
+            role="status"
+            aria-live="polite"
+            aria-label="Загрузка"
+          >
+            <div className="intro-spinner" aria-hidden="true" />
+            <span className="visually-hidden">Загрузка</span>
+          </div>
+        )}
+
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-status-bar" aria-hidden="true">
             <span className="hero-status-time">9:41</span>
@@ -251,6 +372,7 @@ function App() {
               <div className="hero-car-stage">
                 <img
                   className="hero-car"
+                  ref={heroImageRef}
                   src={heroCar}
                   alt=""
                   width="390"

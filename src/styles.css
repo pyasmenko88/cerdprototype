@@ -35,6 +35,52 @@ button {
   background: #ffffff;
 }
 
+.intro-overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  z-index: 1000;
+  display: flex;
+  width: min(100vw, 460px);
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 18vh;
+  background:
+    linear-gradient(
+      180deg,
+      #7259e6 0%,
+      #5a23c7 38%,
+      #ffffff 100%
+    );
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%);
+  transition: opacity 300ms ease;
+}
+
+.mobile-page[data-intro-phase='entering'] .intro-overlay {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgb(255 255 255 / 35%);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: intro-spinner-rotate 700ms linear infinite;
+}
+
+@keyframes intro-spinner-rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .hero {
   position: sticky;
   top: 0;
@@ -447,6 +493,14 @@ button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .intro-overlay {
+    transition: none;
+  }
+
+  .intro-spinner {
+    animation-duration: 1400ms;
+  }
+
   .form-field-label {
     transition: none;
   }
