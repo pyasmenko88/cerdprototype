@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useRef,
   useState,
   type ChangeEvent,
@@ -12,9 +13,6 @@ import benefitFile from './assets/benefit-file.svg';
 import closeIcon from './assets/close.svg';
 import heroCar from './assets/hero-car.png';
 import heroCheck from './assets/hero-check.png';
-import statusBattery from './assets/status-battery.svg';
-import statusCellular from './assets/status-cellular.svg';
-import statusWifi from './assets/status-wifi.svg';
 
 const benefits = [
   {
@@ -40,6 +38,17 @@ const fieldLabels = {
 type FieldName = keyof typeof fieldLabels;
 
 type FormValues = Record<FieldName, string>;
+
+type IntroPhase = 'loading' | 'entering' | 'ready';
+
+const HERO_AMOUNT_START = 85;
+const HERO_AMOUNT_END = 100;
+const HERO_COUNTER_DELAY = 180;
+const HERO_COUNTER_DURATION = 1000;
+const HERO_SCROLL_PIXELS_PER_UNIT = 24;
+const HERO_SCROLL_STEP = 10;
+
+const easeOutCubic = (progress: number) => 1 - Math.pow(1 - progress, 3);
 
 type FormFieldProps = {
   name: FieldName;
@@ -122,11 +131,22 @@ function FormField({
 
 function App() {
   const applicationFormRef = useRef<HTMLElement | null>(null);
+  const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const heroSubtitleRef = useRef<HTMLParagraphElement | null>(null);
+  const heroMediaRef = useRef<HTMLDivElement | null>(null);
+  const heroImageRef = useRef<HTMLImageElement | null>(null);
+  const contentRef = useRef<HTMLElement | null>(null);
+  const introTimeoutRef = useRef<number | null>(null);
+  const introFrameRef = useRef<number | null>(null);
+  const scrollFrameRef = useRef<number | null>(null);
+  const lockedScrollYRef = useRef(0);
   const inputRefs = {
     name: useRef<HTMLInputElement | null>(null),
     phone: useRef<HTMLInputElement | null>(null),
     initialPayment: useRef<HTMLInputElement | null>(null),
   };
+  const [introPhase, setIntroPhase] = useState<IntroPhase>('loading');
+  const [heroAmount, setHeroAmount] = useState(HERO_AMOUNT_START);
   const [values, setValues] = useState<FormValues>({
     name: '',
     phone: '',
@@ -138,6 +158,238 @@ function App() {
     initialPayment: false,
   });
   const [focusedField, setFocusedField] = useState<FieldName | null>(null);
+  const shouldLockScroll = introPhase !== 'ready';
+
+  useEffect(() => {
+    let isCancelled = false;
+    let removeHeroImageListeners: (() => void) | null = null;
+
+    const waitForMinimumLoading = () =>
+      new Promise<void>((resolve) => {
+        introTimeoutRef.current = window.setTimeout(() => {
+          introTimeoutRef.current = null;
+          resolve();
+        }, 800);
+      });
+
+    const waitForHeroImage = () =>
+      new Promise<void>((resolve) => {
+        const image = heroImageRef.current;
+
+        if (!image) {
+          resolve();
+          return;
+        }
+
+        const decodeImage = async () => {
+          if ('decode' in image) {
+            await image.decode().catch(() => undefined);
+          }
+
+          resolve();
+        };
+
+        if (image.complete) {
+          void decodeImage();
+          return;
+        }
+
+        const handleImageDone = () => {
+          removeHeroImageListeners?.();
+          removeHeroImageListeners = null;
+          void decodeImage();
+        };
+
+        image.addEventListener('load', handleImageDone, { once: true });
+        image.addEventListener('error', handleImageDone, { once: true });
+
+        removeHeroImageListeners = () => {
+          image.removeEventListener('load', handleImageDone);
+          image.removeEventListener('error', handleImageDone);
+        };
+      });
+
+    void Promise.allSettled([waitForMinimumLoading(), waitForHeroImage()]).then(() => {
+      if (isCancelled) {
+        return;
+      }
+
+      setIntroPhase('entering');
+
+      introTimeoutRef.current = window.setTimeout(() => {
+        introTimeoutRef.current = null;
+
+        if (!isCancelled) {
+          setIntroPhase('ready');
+        }
+      }, 1700);
+    });
+
+    return () => {
+      isCancelled = true;
+
+      if (introTimeoutRef.current !== null) {
+        window.clearTimeout(introTimeoutRef.current);
+        introTimeoutRef.current = null;
+      }
+
+      removeHeroImageListeners?.();
+      removeHeroImageListeners = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const cancelIntroFrame = () => {
+      if (introFrameRef.current !== null) {
+        window.cancelAnimationFrame(introFrameRef.current);
+        introFrameRef.current = null;
+      }
+    };
+
+    cancelIntroFrame();
+
+    if (introPhase === 'loading') {
+      setHeroAmount(HERO_AMOUNT_START);
+    } else if (
+      introPhase === 'ready' ||
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ) {
+      setHeroAmount(HERO_AMOUNT_END);
+    } else {
+      let startTime: number | null = null;
+
+      const animateCounter = (timestamp: number) => {
+        if (cancelled) {
+          return;
+        }
+
+        startTime ??= timestamp;
+        const elapsed = timestamp - startTime;
+        const counterElapsed = elapsed - HERO_COUNTER_DELAY;
+        const progress = Math.min(
+          Math.max(counterElapsed / HERO_COUNTER_DURATION, 0),
+          1,
+        );
+        const easedProgress = easeOutCubic(progress);
+        const nextAmount = Math.round(
+          HERO_AMOUNT_START +
+            (HERO_AMOUNT_END - HERO_AMOUNT_START) * easedProgress,
+        );
+
+        setHeroAmount((currentAmount) =>
+          currentAmount === nextAmount ? currentAmount : nextAmount,
+        );
+
+        if (progress === 1) {
+          introFrameRef.current = null;
+          return;
+        }
+
+        introFrameRef.current = window.requestAnimationFrame(animateCounter);
+      };
+
+      introFrameRef.current = window.requestAnimationFrame(animateCounter);
+    }
+
+    return () => {
+      cancelled = true;
+      cancelIntroFrame();
+    };
+  }, [introPhase]);
+
+  useEffect(() => {
+    const cancelScrollFrame = () => {
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+        scrollFrameRef.current = null;
+      }
+    };
+
+    cancelScrollFrame();
+
+    if (introPhase !== 'ready') {
+      return undefined;
+    }
+
+    const updateAmountFromScroll = () => {
+      const scrollY = Math.max(window.scrollY, 0);
+      const nextAmount =
+        HERO_AMOUNT_END +
+        Math.floor(scrollY / HERO_SCROLL_PIXELS_PER_UNIT) * HERO_SCROLL_STEP;
+
+      setHeroAmount((currentAmount) =>
+        currentAmount === nextAmount ? currentAmount : nextAmount,
+      );
+
+      scrollFrameRef.current = null;
+    };
+
+    const handleScroll = () => {
+      if (scrollFrameRef.current !== null) {
+        return;
+      }
+
+      scrollFrameRef.current = window.requestAnimationFrame(updateAmountFromScroll);
+    };
+
+    updateAmountFromScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelScrollFrame();
+    };
+  }, [introPhase]);
+
+  useEffect(() => {
+    return () => {
+      if (introTimeoutRef.current !== null) {
+        window.clearTimeout(introTimeoutRef.current);
+      }
+
+      if (introFrameRef.current !== null) {
+        window.cancelAnimationFrame(introFrameRef.current);
+      }
+
+      if (scrollFrameRef.current !== null) {
+        window.cancelAnimationFrame(scrollFrameRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!shouldLockScroll) {
+      return undefined;
+    }
+
+    const { body, documentElement } = document;
+    const previousBodyPosition = body.style.position;
+    const previousBodyTop = body.style.top;
+    const previousBodyLeft = body.style.left;
+    const previousBodyRight = body.style.right;
+    const previousBodyWidth = body.style.width;
+    const previousDocumentOverflow = documentElement.style.overflow;
+
+    lockedScrollYRef.current = window.scrollY;
+    body.style.position = 'fixed';
+    body.style.top = `-${lockedScrollYRef.current}px`;
+    body.style.left = '0';
+    body.style.right = '0';
+    body.style.width = '100%';
+    documentElement.style.overflow = 'hidden';
+
+    return () => {
+      body.style.position = previousBodyPosition;
+      body.style.top = previousBodyTop;
+      body.style.left = previousBodyLeft;
+      body.style.right = previousBodyRight;
+      body.style.width = previousBodyWidth;
+      documentElement.style.overflow = previousDocumentOverflow;
+      window.scrollTo(0, lockedScrollYRef.current);
+    };
+  }, [shouldLockScroll]);
 
   const handleTopCtaClick = () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -196,17 +448,20 @@ function App() {
 
   return (
     <main className="page-shell">
-      <div className="mobile-page">
-        <section className="hero" aria-labelledby="hero-title">
-          <div className="hero-status-bar" aria-hidden="true">
-            <span className="hero-status-time">9:41</span>
-            <span className="hero-status-icons">
-              <img src={statusCellular} alt="" />
-              <img src={statusWifi} alt="" />
-              <img src={statusBattery} alt="" />
-            </span>
+      <div className="mobile-page" data-intro-phase={introPhase}>
+        {introPhase !== 'ready' && (
+          <div
+            className="intro-overlay"
+            role="status"
+            aria-live="polite"
+            aria-label="Загрузка"
+          >
+            <div className="intro-spinner" aria-hidden="true" />
+            <span className="visually-hidden">Загрузка</span>
           </div>
+        )}
 
+        <section className="hero" aria-labelledby="hero-title">
           <nav className="hero-navigation" aria-label="Навигация">
             <button className="hero-close" type="button" aria-label="Закрыть">
               <img src={closeIcon} alt="" />
@@ -215,14 +470,29 @@ function App() {
 
           <div className="hero-content">
             <div className="hero-copy">
-              <h1 id="hero-title">от 100 млн сум</h1>
-              <p>на покупку автомобиля</p>
+              <h1
+                id="hero-title"
+                ref={heroTitleRef}
+                aria-label={
+                  introPhase === 'ready'
+                    ? `от ${heroAmount} млн сум`
+                    : 'от 100 млн сум'
+                }
+              >
+                от{' '}
+                <span className="hero-amount" aria-hidden="true">
+                  {heroAmount}
+                </span>{' '}
+                млн сум
+              </h1>
+              <p ref={heroSubtitleRef}>на покупку автомобиля</p>
             </div>
 
-            <div className="hero-media" aria-hidden="true">
+            <div className="hero-media" ref={heroMediaRef} aria-hidden="true">
               <div className="hero-car-stage">
                 <img
                   className="hero-car"
+                  ref={heroImageRef}
                   src={heroCar}
                   alt=""
                   width="390"
@@ -243,14 +513,7 @@ function App() {
           </div>
         </section>
 
-        <section className="content" aria-label="Заявка на автокредит">
-          <button
-            className="primary-button top-cta"
-            type="button"
-            onClick={handleTopCtaClick}
-          >
-            Оставить заявку
-          </button>
+        <section className="content" ref={contentRef} aria-label="Заявка на автокредит">
 
           <ul className="benefits-list" aria-label="Преимущества">
             {benefits.map((benefit) => (
