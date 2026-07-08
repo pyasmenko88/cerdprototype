@@ -1,4 +1,5 @@
 import {
+  useEffect,
   useRef,
   useState,
   type ChangeEvent,
@@ -40,6 +41,8 @@ const fieldLabels = {
 type FieldName = keyof typeof fieldLabels;
 
 type FormValues = Record<FieldName, string>;
+
+type IntroPhase = 'loading' | 'entering' | 'ready';
 
 type FormFieldProps = {
   name: FieldName;
@@ -122,11 +125,18 @@ function FormField({
 
 function App() {
   const applicationFormRef = useRef<HTMLElement | null>(null);
+  const heroTitleRef = useRef<HTMLHeadingElement | null>(null);
+  const heroSubtitleRef = useRef<HTMLParagraphElement | null>(null);
+  const heroMediaRef = useRef<HTMLDivElement | null>(null);
+  const contentRef = useRef<HTMLElement | null>(null);
+  const introTimeoutRef = useRef<number | null>(null);
+  const introFrameRef = useRef<number | null>(null);
   const inputRefs = {
     name: useRef<HTMLInputElement | null>(null),
     phone: useRef<HTMLInputElement | null>(null),
     initialPayment: useRef<HTMLInputElement | null>(null),
   };
+  const [introPhase, setIntroPhase] = useState<IntroPhase>('loading');
   const [values, setValues] = useState<FormValues>({
     name: '',
     phone: '',
@@ -138,6 +148,22 @@ function App() {
     initialPayment: false,
   });
   const [focusedField, setFocusedField] = useState<FieldName | null>(null);
+
+  useEffect(() => {
+    setIntroPhase('ready');
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (introTimeoutRef.current !== null) {
+        window.clearTimeout(introTimeoutRef.current);
+      }
+
+      if (introFrameRef.current !== null) {
+        window.cancelAnimationFrame(introFrameRef.current);
+      }
+    };
+  }, []);
 
   const handleTopCtaClick = () => {
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -196,7 +222,7 @@ function App() {
 
   return (
     <main className="page-shell">
-      <div className="mobile-page">
+      <div className="mobile-page" data-intro-phase={introPhase}>
         <section className="hero" aria-labelledby="hero-title">
           <div className="hero-status-bar" aria-hidden="true">
             <span className="hero-status-time">9:41</span>
@@ -215,11 +241,13 @@ function App() {
 
           <div className="hero-content">
             <div className="hero-copy">
-              <h1 id="hero-title">от 100 млн сум</h1>
-              <p>на покупку автомобиля</p>
+              <h1 id="hero-title" ref={heroTitleRef}>
+                от 100 млн сум
+              </h1>
+              <p ref={heroSubtitleRef}>на покупку автомобиля</p>
             </div>
 
-            <div className="hero-media" aria-hidden="true">
+            <div className="hero-media" ref={heroMediaRef} aria-hidden="true">
               <div className="hero-car-stage">
                 <img
                   className="hero-car"
@@ -243,7 +271,7 @@ function App() {
           </div>
         </section>
 
-        <section className="content" aria-label="Заявка на автокредит">
+        <section className="content" ref={contentRef} aria-label="Заявка на автокредит">
           <button
             className="primary-button top-cta"
             type="button"
