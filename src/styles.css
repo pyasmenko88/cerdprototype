@@ -180,17 +180,20 @@ button {
 
 .hero-car {
   display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 79.59%;
+  height: auto;
+  margin: 0 auto;
+  object-fit: contain;
 }
 
 .hero-check {
+  display: block;
   position: absolute;
   top: 2px;
   right: calc(var(--hero-car-width) * 0.235);
   width: clamp(48px, 13.33vw, 62px);
   height: auto;
+  object-fit: contain;
 }
 
 .content {

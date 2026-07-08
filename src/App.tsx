@@ -1,7 +1,7 @@
 import { useRef, type FormEvent } from 'react';
 import closeIcon from './assets/close.svg';
 import heroCar from './assets/hero-car.png';
-import heroCheck from './assets/hero-check.svg';
+import heroCheck from './assets/hero-check.png';
 import statusBattery from './assets/status-battery.svg';
 import statusCellular from './assets/status-cellular.svg';
 import statusWifi from './assets/status-wifi.svg';
@@ -55,8 +55,23 @@ function App() {
 
             <div className="hero-media" aria-hidden="true">
               <div className="hero-car-stage">
-                <img className="hero-car" src={heroCar} alt="" />
-                <img className="hero-check" src={heroCheck} alt="" />
+                <img
+                  className="hero-car"
+                  src={heroCar}
+                  alt=""
+                  width="390"
+                  height="247"
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
+                />
+                <img
+                  className="hero-check"
+                  src={heroCheck}
+                  alt=""
+                  width="184"
+                  height="184"
+                />
               </div>
             </div>
           </div>
