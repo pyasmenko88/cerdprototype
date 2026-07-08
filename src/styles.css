@@ -58,7 +58,7 @@ button {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-50%);
-  transition: opacity 300ms ease;
+  transition: opacity 450ms ease;
 }
 
 .mobile-page[data-intro-phase='entering'] .intro-overlay {
@@ -119,26 +119,26 @@ button {
 
 .mobile-page[data-intro-phase='entering'] .hero-copy h1 {
   transition:
-    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1) 120ms,
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1) 120ms;
+    opacity 630ms cubic-bezier(0.22, 1, 0.36, 1) 180ms,
+    transform 630ms cubic-bezier(0.22, 1, 0.36, 1) 180ms;
 }
 
 .mobile-page[data-intro-phase='entering'] .hero-copy p {
   transition:
-    opacity 420ms cubic-bezier(0.22, 1, 0.36, 1) 240ms,
-    transform 420ms cubic-bezier(0.22, 1, 0.36, 1) 240ms;
+    opacity 630ms cubic-bezier(0.22, 1, 0.36, 1) 360ms,
+    transform 630ms cubic-bezier(0.22, 1, 0.36, 1) 360ms;
 }
 
 .mobile-page[data-intro-phase='entering'] .hero-media {
   transition:
-    opacity 500ms cubic-bezier(0.22, 1, 0.36, 1) 380ms,
-    transform 500ms cubic-bezier(0.22, 1, 0.36, 1) 380ms;
+    opacity 750ms cubic-bezier(0.22, 1, 0.36, 1) 570ms,
+    transform 750ms cubic-bezier(0.22, 1, 0.36, 1) 570ms;
 }
 
 .mobile-page[data-intro-phase='entering'] .content {
   transition:
-    opacity 540ms cubic-bezier(0.22, 1, 0.36, 1) 560ms,
-    transform 540ms cubic-bezier(0.22, 1, 0.36, 1) 560ms;
+    opacity 810ms cubic-bezier(0.22, 1, 0.36, 1) 840ms,
+    transform 810ms cubic-bezier(0.22, 1, 0.36, 1) 840ms;
 }
 
 .hero {
