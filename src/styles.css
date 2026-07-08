@@ -253,6 +253,13 @@ button {
   line-height: 1;
 }
 
+.hero-amount {
+  display: inline-block;
+  min-width: 3ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
 .hero-copy p {
   color: #ffffff;
   font-size: 20px;
