@@ -30,7 +30,7 @@ const benefits = [
 ];
 
 const fieldLabels = {
-  name: 'Имя',
+  name: 'ФИО',
   phone: 'Номер телефона',
   initialPayment: 'Первоначальный взнос сум',
 };
