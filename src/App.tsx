@@ -8,17 +8,12 @@ import {
   type RefObject,
 } from 'react';
 import benefitCar from './assets/benefit-car.svg';
-import benefitClock from './assets/benefit-clock.svg';
 import benefitFile from './assets/benefit-file.svg';
 import closeIcon from './assets/close.svg';
 import heroCar from './assets/hero-car.png';
 import heroCheck from './assets/hero-check.png';
 
 const benefits = [
-  {
-    text: 'Оставьте заявку всего за 1 минуту',
-    icon: benefitClock,
-  },
   {
     text: 'Поможем подобрать автомобиль',
     icon: benefitCar,
