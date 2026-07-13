@@ -8,17 +8,12 @@ import {
   type RefObject,
 } from 'react';
 import benefitCar from './assets/benefit-car.svg';
-import benefitClock from './assets/benefit-clock.svg';
 import benefitFile from './assets/benefit-file.svg';
 import closeIcon from './assets/close.svg';
 import heroCar from './assets/hero-car.png';
 import heroCheck from './assets/hero-check.png';
 
 const benefits = [
-  {
-    text: 'Оставьте заявку всего за 1 минуту',
-    icon: benefitClock,
-  },
   {
     text: 'Поможем подобрать автомобиль',
     icon: benefitCar,
@@ -41,12 +36,10 @@ type FormValues = Record<FieldName, string>;
 
 type IntroPhase = 'loading' | 'entering' | 'ready';
 
-const HERO_AMOUNT_START = 85;
-const HERO_AMOUNT_END = 100;
+const HERO_AMOUNT_START = 285;
+const HERO_AMOUNT_END = 300;
 const HERO_COUNTER_DELAY = 180;
 const HERO_COUNTER_DURATION = 1000;
-const HERO_SCROLL_PIXELS_PER_UNIT = 24;
-const HERO_SCROLL_STEP = 10;
 
 const easeOutCubic = (progress: number) => 1 - Math.pow(1 - progress, 3);
 
@@ -138,7 +131,6 @@ function App() {
   const contentRef = useRef<HTMLElement | null>(null);
   const introTimeoutRef = useRef<number | null>(null);
   const introFrameRef = useRef<number | null>(null);
-  const scrollFrameRef = useRef<number | null>(null);
   const lockedScrollYRef = useRef(0);
   const inputRefs = {
     name: useRef<HTMLInputElement | null>(null),
@@ -300,50 +292,6 @@ function App() {
   }, [introPhase]);
 
   useEffect(() => {
-    const cancelScrollFrame = () => {
-      if (scrollFrameRef.current !== null) {
-        window.cancelAnimationFrame(scrollFrameRef.current);
-        scrollFrameRef.current = null;
-      }
-    };
-
-    cancelScrollFrame();
-
-    if (introPhase !== 'ready') {
-      return undefined;
-    }
-
-    const updateAmountFromScroll = () => {
-      const scrollY = Math.max(window.scrollY, 0);
-      const nextAmount =
-        HERO_AMOUNT_END +
-        Math.floor(scrollY / HERO_SCROLL_PIXELS_PER_UNIT) * HERO_SCROLL_STEP;
-
-      setHeroAmount((currentAmount) =>
-        currentAmount === nextAmount ? currentAmount : nextAmount,
-      );
-
-      scrollFrameRef.current = null;
-    };
-
-    const handleScroll = () => {
-      if (scrollFrameRef.current !== null) {
-        return;
-      }
-
-      scrollFrameRef.current = window.requestAnimationFrame(updateAmountFromScroll);
-    };
-
-    updateAmountFromScroll();
-    window.addEventListener('scroll', handleScroll, { passive: true });
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      cancelScrollFrame();
-    };
-  }, [introPhase]);
-
-  useEffect(() => {
     return () => {
       if (introTimeoutRef.current !== null) {
         window.clearTimeout(introTimeoutRef.current);
@@ -353,9 +301,6 @@ function App() {
         window.cancelAnimationFrame(introFrameRef.current);
       }
 
-      if (scrollFrameRef.current !== null) {
-        window.cancelAnimationFrame(scrollFrameRef.current);
-      }
     };
   }, []);
 
@@ -475,17 +420,17 @@ function App() {
                 ref={heroTitleRef}
                 aria-label={
                   introPhase === 'ready'
-                    ? `от ${heroAmount} млн сум`
-                    : 'от 100 млн сум'
+                    ? `до ${heroAmount} млн сум`
+                    : 'до 300 млн сум'
                 }
               >
-                от{' '}
+                до{' '}
                 <span className="hero-amount" aria-hidden="true">
                   {heroAmount}
                 </span>{' '}
                 млн сум
               </h1>
-              <p ref={heroSubtitleRef}>на покупку автомобиля</p>
+              <p ref={heroSubtitleRef}>на покупку авто</p>
             </div>
 
             <div className="hero-media" ref={heroMediaRef} aria-hidden="true">
